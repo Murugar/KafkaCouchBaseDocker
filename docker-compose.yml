@@ -1,0 +1,34 @@
+version: '2'
+services:
+  zookeeper:
+    container_name: couchbasekafkadocker_zookeeper_1
+    image: marekstachura/zookeeper-docker
+    ports:
+      - 2181:2181
+    environment:
+      ZOOKEEPER_MAXCLIENTCNXNS: 0
+  kafka:
+    image: wurstmeister/kafka:0.8.2.0
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: 192.168.99.100 
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_CREATE_TOPICS: "couchbaseTopic:1:1"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  couchbase:
+    container_name: couchbasekafkadocker_couchbase_1
+    image: couchbase:enterprise-4.5.0
+    volumes:
+      - ./:/opt/couchbase/var
+    ports:
+      - "8091:8091"
+      - "8092:8092"
+      - "8093:8093"
+      - "8094:8094"
+      - "11210:11210"
